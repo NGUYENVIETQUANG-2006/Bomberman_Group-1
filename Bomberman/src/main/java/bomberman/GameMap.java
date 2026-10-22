@@ -30,7 +30,6 @@ public class GameMap {
     }
 
     // ---------- Truy vấn lưới ----------
-
     public boolean inBounds(int r, int c) {
         return r >= 0 && r < rows && c >= 0 && c < columns;
     }
@@ -57,7 +56,6 @@ public class GameMap {
     }
 
     // ---------- Thay đổi lưới ----------
-
     public void setTile(int r, int c, Entity e) {
         if (inBounds(r, c)) tiles[r][c] = e;
     }
@@ -68,7 +66,6 @@ public class GameMap {
     }
 
     // ---------- Đối tượng động ----------
-
     public void addBomb(Bomb b)       { bombs.add(b); }
     public void addEnemy(Enemy e)     { enemies.add(e); }
     public void addFlame(Flame f)     { flames.add(f); }
@@ -78,7 +75,6 @@ public class GameMap {
     public List<Flame> getFlames()    { return flames; }
 
     // ---------- Vị trí xuất phát của Player ----------
-
     public void setPlayerSpawn(int r, int c) {
         this.playerSpawnRow = r;
         this.playerSpawnCol = c;

@@ -49,7 +49,6 @@ public class LevelLoader {
         for (int r = 0; r < rows; r++) {
             String line = lines.get(r + 1);
             for (int c = 0; c < cols; c++) {
-                // Trình soạn thảo hay cắt khoảng trắng cuối dòng, nên ký tự thiếu coi là ô trống.
                 char symbol = c < line.length() ? line.charAt(c) : ' ';
 
                 if (symbol == 'p') {
