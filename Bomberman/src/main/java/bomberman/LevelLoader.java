@@ -9,7 +9,6 @@ import java.util.List;
 
 /**
  * Đọc file map từ classpath (thư mục resources) và dựng GameMap.
- * Cách này chạy được cả khi chạy trong IDE lẫn khi đóng gói thành JAR.
  *
  * Định dạng file:
  *   Dòng 1: "<số hàng> <số cột>"

@@ -1,8 +1,6 @@
 package bomberman;
 
 /**
- * Factory Pattern: biến một ký tự trong file map thành đối tượng tương ứng.
- * Thêm loại đối tượng mới chỉ cần thêm một dòng case, không phải sửa LevelLoader.
  *
  * Bảng ký tự:
  *   '#' Wall          '*' Brick         'x' Portal
