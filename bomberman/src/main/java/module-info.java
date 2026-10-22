@@ -3,5 +3,5 @@ module bomberman {
     requires transitive javafx.graphics;
     requires javafx.media;
 
-    exports bomberman;
+    exports bomb;
 }
