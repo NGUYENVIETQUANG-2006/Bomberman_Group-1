@@ -3,7 +3,7 @@ package bomb;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Player extends GameCharacter {
-    private static final double BASE_SPEED = 200;
+    private static final double BASE_SPEED = 160;
     private static final double MAX_SPEED = 240;
     private static final double SPEED_STEP = 20;
 
@@ -26,8 +26,6 @@ public class Player extends GameCharacter {
     private int blastRange = START_BLAST_RANGE;
     private final int maxBlastRange = MAX_BLAST_RANGE;
     private double cooldownTimer = 0;
-    private Direction blockedDirection;
-
     private final InputHandler control;
     private final KeysBinding keys;
 
@@ -48,10 +46,6 @@ public class Player extends GameCharacter {
         }
         if (invincibleTimer > 0) {
             invincibleTimer -= dt;
-        }
-
-        if (blockedDirection != null && !isDirectionHeld(blockedDirection)) {
-            blockedDirection = null;
         }
 
         Direction d = readDirection();
@@ -142,26 +136,29 @@ public class Player extends GameCharacter {
 
     private void clearBlockedDirection(Direction d) {
         direction = null;
-        blockedDirection = d;
     }
 
     private Direction readDirection() {
-        for (Direction candidate : Direction.values()) {
-            if (candidate != blockedDirection && isDirectionHeld(candidate)) {
+        for (javafx.scene.input.KeyCode key : control.getHeldKeysNewestFirst()) {
+            Direction candidate = directionForAction(keys.actionFor(key));
+            if (candidate != null) {
                 return candidate;
             }
         }
         return null;
     }
 
-    private boolean isDirectionHeld(Direction d) {
-        KeysBinding.Action action = switch (d) {
-            case UP -> KeysBinding.Action.UP;
-            case DOWN -> KeysBinding.Action.DOWN;
-            case LEFT -> KeysBinding.Action.LEFT;
-            case RIGHT -> KeysBinding.Action.RIGHT;
+    private Direction directionForAction(KeysBinding.Action action) {
+        if (action == null) {
+            return null;
+        }
+        return switch (action) {
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
+            case LEFT -> Direction.LEFT;
+            case RIGHT -> Direction.RIGHT;
+            case BOMB -> null;
         };
-        return control.isHeld(keys.get(action));
     }
 
     @Override
