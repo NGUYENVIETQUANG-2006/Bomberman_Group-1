@@ -1,4 +1,4 @@
-package bomberman;
+package bomb;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +49,6 @@ public class LevelLoader {
         for (int r = 0; r < rows; r++) {
             String line = lines.get(r + 1);
             for (int c = 0; c < cols; c++) {
-                // Trình soạn thảo hay cắt khoảng trắng cuối dòng, nên ký tự thiếu coi là ô trống.
                 char symbol = c < line.length() ? line.charAt(c) : ' ';
 
                 if (symbol == 'p') {
@@ -68,14 +67,12 @@ public class LevelLoader {
         return map;
     }
 
-    /** Đọc toàn bộ dòng của một file trong classpath. */
     private List<String> readLines(String resourcePath) throws IOException {
         try (InputStream in = LevelLoader.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
                 throw new IOException("Không tìm thấy file map trong resources: " + resourcePath);
             }
-            try (BufferedReader reader =
-                         new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
                 return reader.lines().toList();
             }
         }

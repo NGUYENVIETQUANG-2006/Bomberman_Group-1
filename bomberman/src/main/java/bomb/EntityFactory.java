@@ -1,13 +1,12 @@
-package bomberman;
+package bomb;
 
 /**
  *
  * Bảng ký tự:
  *   '#' Wall          '*' Brick         'x' Portal
- *   'h' HealthItem    'f' FlameItem     's' SpeedItem    'c' CooldownItem
  *   '1' Grunt         '2' Juggernaut
  *   ' ' ô trống (cỏ)  -> trả về null
- *   'p' vị trí xuất phát của Player -> do LevelLoader xử lý, không tạo ở đây
+ *   'p' vị trí xuất phát của Player
  */
 public class EntityFactory {
     public Entity create(char symbol, int r, int c) {
@@ -18,11 +17,6 @@ public class EntityFactory {
             case '#' -> new Wall(x, y);
             case '*' -> new Brick(x, y);
             case 'x' -> new Portal(x, y);
-
-            case 'h' -> new HealthItem(x, y);
-            case 'f' -> new FlameItem(x, y);
-            case 's' -> new SpeedItem(x, y);
-            case 'c' -> new CooldownItem(x, y);
 
             case '1' -> new Grunt(x, y);
             case '2' -> new Juggernaut(x, y);
