@@ -34,7 +34,7 @@ public class Game {
 
     private GameMap map;
     private Player player;
-    private int level;
+    private int level = 1;
     private State state;
 
     public Game(Canvas canvas, InputHandler input) {

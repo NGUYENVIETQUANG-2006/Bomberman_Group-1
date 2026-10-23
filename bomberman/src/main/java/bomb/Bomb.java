@@ -60,6 +60,10 @@ public class Bomb extends Entity {
                 if (tile instanceof Brick brick) {
                     brick.onFlameHit();
                     map.removeTile(nr, nc);
+                    Item drop = brick.rollDrop();
+                    if (drop != null) {
+                        map.setTile(nr, nc, drop);
+                    }
                     break;
                 }
 

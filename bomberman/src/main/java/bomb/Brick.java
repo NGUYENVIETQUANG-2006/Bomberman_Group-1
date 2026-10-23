@@ -2,7 +2,7 @@ package bomb;
 
 public class Brick extends Entity {
     private boolean destroyed = false;
-    ItemSpawner its = new ItemSpawner();
+    private final ItemSpawner itemSpawner = new ItemSpawner();
  
     public Brick(double x, double y) {
         super(x, y);
@@ -18,6 +18,10 @@ public class Brick extends Entity {
  
     public void destroy() {
         destroyed = true;
+    }
+
+    Item rollDrop() {
+        return itemSpawner.rollDrop(x, y);
     }
  
     public boolean isDestroyed() {

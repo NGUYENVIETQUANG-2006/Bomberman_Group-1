@@ -16,7 +16,7 @@ public class Player extends GameCharacter {
     private static final double INVINCIBLE_TIME = 1.5;
 
     private static final int START_BLAST_RANGE = 1;
-    private static final int MAX_BLAST_RANGE = 6;
+    private static final int MAX_BLAST_RANGE = 3;
 
     private int health = START_HEALTH;
     private int score = 0;
@@ -26,6 +26,7 @@ public class Player extends GameCharacter {
     private int blastRange = START_BLAST_RANGE;
     private final int maxBlastRange = MAX_BLAST_RANGE;
     private double cooldownTimer = 0;
+    private Direction blockedDirection;
 
     private final InputHandler control;
     private final KeysBinding keys;
@@ -49,10 +50,18 @@ public class Player extends GameCharacter {
             invincibleTimer -= dt;
         }
 
+        if (blockedDirection != null && !isDirectionHeld(blockedDirection)) {
+            blockedDirection = null;
+        }
+
         Direction d = readDirection();
         if (d != null) {
             direction = d;
-            move(d.dx * speed * dt, d.dy * speed * dt, map);
+            if (hasClearCenterPath(d)) {
+                moveGridAligned(d, dt);
+            } else {
+                clearBlockedDirection(d);
+            }
         }
 
         if (control.wasPressed(keys.get(KeysBinding.Action.BOMB))) {
@@ -63,12 +72,101 @@ public class Player extends GameCharacter {
         }
     }
 
+    private boolean hasClearCenterPath(Direction d) {
+        int currentRow = cellAlongMovementAxis(y, d.dy, getRow());
+        int currentCol = cellAlongMovementAxis(x, d.dx, getCol());
+        int nextRow = currentRow + d.dy;
+        int nextCol = currentCol + d.dx;
+        return !map.isBlockedAt(nextRow, nextCol);
+    }
+
+    private int cellAlongMovementAxis(double position, int movement, int fallback) {
+        double cellPosition = position / GameMap.TILE_SIZE;
+        if (movement > 0) {
+            return (int) Math.floor(cellPosition);
+        }
+        if (movement < 0) {
+            return (int) Math.ceil(cellPosition);
+        }
+        return fallback;
+    }
+
+    void moveGridAligned(Direction d, double dt) {
+        double distance = Math.max(0, speed * dt);
+        if (d.dx != 0) {
+            double targetY = Math.round(y / GameMap.TILE_SIZE) * GameMap.TILE_SIZE;
+            double correction = targetY - y;
+            double step = Math.min(Math.abs(correction), distance);
+            if (step > 0) {
+                double previousY = y;
+                move(0, Math.copySign(step, correction), map);
+                if (Math.abs(y - previousY) < 1e-6) {
+                    clearBlockedDirection(d);
+                    return;
+                }
+                distance -= step;
+            }
+            if (Math.abs(y - targetY) < 1e-6 && distance > 0) {
+                double previousX = x;
+                move(d.dx * distance, 0, map);
+                if (Math.abs(x - previousX) < 1e-6) {
+                    clearBlockedDirection(d);
+                }
+            } else if (Math.abs(y - targetY) >= 1e-6 && step == 0) {
+                clearBlockedDirection(d);
+            }
+        } else {
+            double targetX = Math.round(x / GameMap.TILE_SIZE) * GameMap.TILE_SIZE;
+            double correction = targetX - x;
+            double step = Math.min(Math.abs(correction), distance);
+            if (step > 0) {
+                double previousX = x;
+                move(Math.copySign(step, correction), 0, map);
+                if (Math.abs(x - previousX) < 1e-6) {
+                    clearBlockedDirection(d);
+                    return;
+                }
+                distance -= step;
+            }
+            if (Math.abs(x - targetX) < 1e-6 && distance > 0) {
+                double previousY = y;
+                move(0, d.dy * distance, map);
+                if (Math.abs(y - previousY) < 1e-6) {
+                    clearBlockedDirection(d);
+                }
+            } else if (Math.abs(x - targetX) >= 1e-6 && step == 0) {
+                clearBlockedDirection(d);
+            }
+        }
+    }
+
+    private void clearBlockedDirection(Direction d) {
+        direction = null;
+        blockedDirection = d;
+    }
+
     private Direction readDirection() {
-        if (control.isHeld(keys.get(KeysBinding.Action.UP))) return Direction.UP;
-        if (control.isHeld(keys.get(KeysBinding.Action.DOWN))) return Direction.DOWN;
-        if (control.isHeld(keys.get(KeysBinding.Action.LEFT))) return Direction.LEFT;
-        if (control.isHeld(keys.get(KeysBinding.Action.RIGHT))) return Direction.RIGHT;
+        for (Direction candidate : Direction.values()) {
+            if (candidate != blockedDirection && isDirectionHeld(candidate)) {
+                return candidate;
+            }
+        }
         return null;
+    }
+
+    private boolean isDirectionHeld(Direction d) {
+        KeysBinding.Action action = switch (d) {
+            case UP -> KeysBinding.Action.UP;
+            case DOWN -> KeysBinding.Action.DOWN;
+            case LEFT -> KeysBinding.Action.LEFT;
+            case RIGHT -> KeysBinding.Action.RIGHT;
+        };
+        return control.isHeld(keys.get(action));
+    }
+
+    @Override
+    protected boolean canMoveThroughBombs() {
+        return true;
     }
 
     public boolean canPlaceBomb() {

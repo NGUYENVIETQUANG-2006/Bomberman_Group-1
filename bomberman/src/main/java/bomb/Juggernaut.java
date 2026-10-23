@@ -4,7 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 public class Juggernaut extends Enemy {
-    private static final double SPEED = 90;
+    private static final double SPEED = 100;
     private static final int DETECT_RANGE = 8;
 
     public Juggernaut(double x, double y) {

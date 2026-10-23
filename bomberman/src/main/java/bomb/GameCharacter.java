@@ -52,10 +52,14 @@ public abstract class GameCharacter extends Entity {
         for (Bomb b : map.getBombs()) {
             boolean willOverlap = overlapsCell(nx, ny, b.getRow(), b.getCol());
             boolean overlapsNow = overlapsCell(x, y, b.getRow(), b.getCol());
-            if (willOverlap && !overlapsNow) {
+            if (willOverlap && !overlapsNow && !canMoveThroughBombs()) {
                 return true;
             }
         }
+        return false;
+    }
+
+    protected boolean canMoveThroughBombs() {
         return false;
     }
 
