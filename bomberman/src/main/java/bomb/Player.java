@@ -209,10 +209,10 @@ public class Player extends GameCharacter {
         bombCooldown = Math.max(MIN_COOLDOWN, bombCooldown - COOLDOWN_STEP);
     }
 
-    public int getHealth()       { return health; }
-    public int getScore()        { return score; }
-    public void addScore(int p)  { score += p; }
-    public int getBlastRange()   { return blastRange; }
+    public int getHealth() { return health; }
+    public int getScore() { return score; }
+    public void addScore(int p) { score += p; }
+    public int getBlastRange() { return blastRange; }
     public boolean isInvincible() { return invincibleTimer > 0; }
 
     @Override
