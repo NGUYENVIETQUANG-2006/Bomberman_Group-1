@@ -161,11 +161,6 @@ public class Player extends GameCharacter {
         };
     }
 
-    @Override
-    protected boolean canMoveThroughBombs() {
-        return true;
-    }
-
     public boolean canPlaceBomb() {
         return isAlive() && cooldownTimer <= 0;
     }
