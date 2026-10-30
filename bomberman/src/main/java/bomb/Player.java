@@ -215,6 +215,17 @@ public class Player extends GameCharacter {
     public int getBlastRange() { return blastRange; }
     public boolean isInvincible() { return invincibleTimer > 0; }
 
+    public double getSpeed() { return speed; }
+    public double getBombCooldown() { return bombCooldown; }
+
+    public void restoreState(int health, int score, double speed, int blastRange, double bombCooldown) {
+        this.health = Math.max(1, Math.min(maxHealth, health));
+        this.score = Math.max(0, score);
+        this.speed = Math.max(BASE_SPEED, Math.min(getMaxSpeed(), speed));
+        this.blastRange = Math.max(START_BLAST_RANGE, Math.min(maxBlastRange, blastRange));
+        this.bombCooldown = Math.max(MIN_COOLDOWN, Math.min(BASE_COOLDOWN, bombCooldown));
+    }
+
     @Override
     public void render(GraphicsContext gc) {
         if (isInvincible() && ((int) (invincibleTimer * 10)) % 2 == 0) {

@@ -5,13 +5,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
  
-/**
- * Menu chính. Lớp này chỉ dựng giao diện và gọi lại các hành động được truyền vào
- * (Runnable), nên nó không cần biết "Chơi" hay "Cài đặt" thực sự làm gì: App quyết định.
- */
 public class MainMenu extends VBox {
  
-    public MainMenu(Runnable onPlay, Runnable onSettings, Runnable onQuit) {
+    public MainMenu(Runnable onPlay, Runnable onContinue, Runnable onScores, Runnable onSettings, Runnable onQuit) {
         setAlignment(Pos.CENTER);
         setSpacing(18);
         setStyle("-fx-background-color: #1b5e20;");
@@ -19,14 +15,11 @@ public class MainMenu extends VBox {
         Label title = new Label("BOMBERMAN");
         title.setStyle("-fx-font-size: 64px; -fx-font-weight: bold; -fx-text-fill: white;");
  
-        getChildren().addAll(
-                title,
-                menuButton("Chơi", onPlay),
-                menuButton("Cài đặt", onSettings),
-                menuButton("Thoát", onQuit));
+        getChildren().addAll(title, menuButton("Chơi mới", onPlay));
+        if (bomb.GameStorage.hasSave()) getChildren().add(menuButton("Tiếp tục", onContinue));
+        getChildren().addAll(menuButton("Bảng xếp hạng", onScores), menuButton("Cài đặt", onSettings), menuButton("Thoát", onQuit));
     }
  
-    /** Nút dùng chung cho các menu. */
     static Button menuButton(String text, Runnable action) {
         Button button = new Button(text);
         button.setPrefWidth(240);

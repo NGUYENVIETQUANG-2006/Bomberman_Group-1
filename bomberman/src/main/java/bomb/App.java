@@ -13,10 +13,10 @@ import javafx.stage.Stage;
 
 import main.MainMenu;
 import main.SettingsMenu;
+import main.ScoreboardMenu;
 
 public class App extends Application {
-    private static final Path KEYS_FILE =
-            Path.of(System.getProperty("user.home"), ".bomberman", "keys_p1.properties");
+    private static final Path KEYS_FILE = Path.of(System.getProperty("user.home"), ".bomberman", "keys_p1.properties");
 
     private final KeysBinding keys = KeysBinding.arrows();
     private Stage stage;
@@ -33,7 +33,19 @@ public class App extends Application {
     }
 
     private void showMainMenu() {
-        show(new MainMenu(this::showGame, this::showSettings, Platform::exit));
+        show(new MainMenu(this::showGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
+    }
+
+    private void continueGame() {
+        try {
+            showGame(GameStorage.load());
+        } catch (IOException | RuntimeException e) {
+            show(new MainMenu(this::showGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
+        }
+    }
+
+    private void showScoreboard() {
+        show(new ScoreboardMenu(this::showMainMenu));
     }
 
     private void showSettings() {
@@ -41,6 +53,10 @@ public class App extends Application {
     }
 
     private void showGame() {
+        showGame(null);
+    }
+
+    private void showGame(GameStorage.Save savedGame) {
         Canvas canvas = new Canvas(Game.WIDTH, Game.HEIGHT);
         Scene scene = new Scene(new Group(canvas));
 
@@ -52,7 +68,7 @@ public class App extends Application {
 
         stage.setScene(scene);
         stage.sizeToScene();
-        game.start();
+        if (savedGame == null) game.start(); else game.startSaved(savedGame);
     }
 
     private void show(Parent root) {

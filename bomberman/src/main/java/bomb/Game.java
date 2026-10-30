@@ -3,6 +3,7 @@ package bomb;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.io.IOException;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
@@ -36,11 +37,12 @@ public class Game {
     private State state;
     private final KeysBinding keys;
     private Runnable onExit;
-    private static final String[] PAUSE_OPTIONS = {"Tiếp tục", "Chơi lại", "Về menu chính"};
+    private static final String[] PAUSE_OPTIONS = {"Tiếp tục", "Lưu ván", "Chơi lại", "Về menu chính"};
     private int pauseIndex;
     private static final double PAUSE_TOP = HEIGHT / 2.0 - 55;
     private static final double PAUSE_ITEM_H = 44;
     private static final double PAUSE_ITEM_W = 320;
+    private boolean scoreRecorded;
 
     public Game(Canvas canvas, InputHandler input, KeysBinding keys) {
         this.gc = canvas.getGraphicsContext2D();
@@ -78,10 +80,21 @@ public class Game {
         timer.start();
     }
 
+    public void startSaved(GameStorage.Save save) {
+        level = Math.max(1, Math.min(MAX_LEVEL, save.level()));
+        state = State.PLAYING;
+        loadLevel();
+        player.setPosition(save.x(), save.y());
+        player.restoreState(save.health(), save.score(), save.speed(), save.blastRange(), save.bombCooldown());
+        scoreRecorded = false;
+        timer.start();
+    }
+
     private void startNewGame() {
         level = 1;
         player = null;
         state = State.PLAYING;
+        scoreRecorded = false;
         loadLevel();
     }
 
@@ -118,6 +131,10 @@ public class Game {
         }
 
         if (state != State.PLAYING) {
+            if (input.wasPressed(KeyCode.ESCAPE)) {
+                exitToMenu();
+                return;
+            }
             if (input.wasPressed(KeyCode.ENTER)) {
                 startNewGame();
             }
@@ -185,11 +202,13 @@ public class Game {
     private void checkEndConditions() {
         if (!player.isAlive()) {
             state = State.GAME_OVER;
+            recordScore();
             return;
         }
         boolean onPortal = map.getTile(player.getRow(), player.getCol()) instanceof Portal;
-        if (onPortal && map.getEnemies().isEmpty()) {
+        if (onPortal /*&& map.getEnemies().isEmpty()*/) {
             nextLevel();
+            if (state == State.VICTORY) recordScore();
         }
     }
 
@@ -424,8 +443,29 @@ public class Game {
     private void activatePauseOption() {
         switch (pauseIndex) {
             case 0 -> state = State.PLAYING;
-            case 1 -> startNewGame();
+            case 1 -> saveGame();
+            case 2 -> startNewGame();
             default -> exitToMenu();
+        }
+    }
+
+    private void saveGame() {
+        try {
+            GameStorage.save(new GameStorage.Save(level, player.getX(), player.getY(), player.getHealth(),
+                    player.getScore(), player.getSpeed(), player.getBlastRange(), player.getBombCooldown()));
+            state = State.PLAYING;
+        } catch (IOException e) {
+            System.err.println("Không lưu được ván chơi: " + e.getMessage());
+        }
+    }
+
+    private void recordScore() {
+        if (scoreRecorded) return;
+        scoreRecorded = true;
+        try {
+            GameStorage.recordScore("Người chơi", player.getScore());
+        } catch (IOException e) {
+            System.err.println("Không lưu được scoreboard: " + e.getMessage());
         }
     }
 }
