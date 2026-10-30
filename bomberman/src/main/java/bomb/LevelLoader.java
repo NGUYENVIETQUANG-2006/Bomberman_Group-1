@@ -7,13 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * Đọc file map từ classpath (thư mục resources) và dựng GameMap.
- *
- * Định dạng file:
- *   Dòng 1: "<số hàng> <số cột>"
- *   Các dòng tiếp theo: mỗi dòng là một hàng, mỗi ký tự là một ô (xem EntityFactory).
- */
 public class LevelLoader {
     private final EntityFactory factory;
 
