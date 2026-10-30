@@ -12,34 +12,40 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.Cursor;
+import javafx.scene.input.MouseButton;
 
 public class Game {
-    public static final int COLS = 20;
-    public static final int ROWS = 15;
+    public static final int COLS = 30;
+    public static final int ROWS = 20;
     public static final int HUD_HEIGHT = 48;
     public static final int WIDTH = COLS * GameMap.TILE_SIZE;
     public static final int HEIGHT = ROWS * GameMap.TILE_SIZE + HUD_HEIGHT;
-
     private static final int MAX_LEVEL = 3;
     private static final String LEVEL_PATH = "/bomb/maps/level%d.txt";
     private static final int ENEMY_SCORE = 100;
     private static final double MAX_DT = 0.05;
-
-    private enum State { PLAYING, GAME_OVER, VICTORY }
-
+    private enum State { PLAYING, PAUSED, GAME_OVER, VICTORY }
     private final GraphicsContext gc;
     private final InputHandler input;
     private final LevelLoader loader = new LevelLoader(new EntityFactory());
     private final AnimationTimer timer;
-
     private GameMap map;
     private Player player;
     private int level = 1;
     private State state;
+    private final KeysBinding keys;
+    private Runnable onExit;
+    private static final String[] PAUSE_OPTIONS = {"Tiếp tục", "Chơi lại", "Về menu chính"};
+    private int pauseIndex;
+    private static final double PAUSE_TOP = HEIGHT / 2.0 - 55;
+    private static final double PAUSE_ITEM_H = 44;
+    private static final double PAUSE_ITEM_W = 320;
 
-    public Game(Canvas canvas, InputHandler input) {
+    public Game(Canvas canvas, InputHandler input, KeysBinding keys) {
         this.gc = canvas.getGraphicsContext2D();
         this.input = input;
+        this.keys = keys;
         this.timer = new AnimationTimer() {
             private long last = 0;
 
@@ -49,6 +55,7 @@ public class Game {
                     last = now;
                     return;
                 }
+
                 double dt = Math.min((now - last) / 1e9, MAX_DT);
                 last = now;
 
@@ -57,6 +64,13 @@ public class Game {
                 input.endFrame();
             }
         };
+
+        canvas.setOnMouseMoved(e -> onMouseMoved(canvas, e.getX(), e.getY()));
+        canvas.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                onMouseClicked(e.getX(), e.getY());
+            }
+        });
     }
 
     public void start() {
@@ -81,7 +95,7 @@ public class Game {
         double px = map.getPlayerSpawnCol() * GameMap.TILE_SIZE;
         double py = map.getPlayerSpawnRow() * GameMap.TILE_SIZE;
         if (player == null) {
-            player = new Player(px, py, input, KeysBinding.wasd());
+            player = new Player(px, py, input, keys);
         } else {
             player.setPosition(px, py);
         }
@@ -98,6 +112,11 @@ public class Game {
     }
 
     private void update(double dt) {
+        if (state == State.PAUSED) {
+            updatePauseMenu();
+            return;
+        }
+
         if (state != State.PLAYING) {
             if (input.wasPressed(KeyCode.ENTER)) {
                 startNewGame();
@@ -105,13 +124,19 @@ public class Game {
             return;
         }
 
+        if (input.wasPressed(KeyCode.ESCAPE)) {
+            state = State.PAUSED;
+            pauseIndex = 0;
+            return;
+        }
+
         player.update(dt);
         for (Enemy e : new ArrayList<>(map.getEnemies())) {
             e.update(dt);
         }
+
         updateBombs(dt);
         updateFlames(dt);
-        updateItems(dt);
         removeDeadEnemies();
         pickUpItem();
         checkEndConditions();
@@ -134,19 +159,6 @@ public class Game {
             f.update(dt);
         }
         map.getFlames().removeIf(Flame::isExpired);
-    }
-
-    private void updateItems(double dt) {
-        for (int r = 0; r < map.getRows(); r++) {
-            for (int c = 0; c < map.getColumns(); c++) {
-                if (map.getTile(r, c) instanceof Item item) {
-                    item.update(dt);
-                    if (item.isExpired()) {
-                        map.removeTile(r, c);
-                    }
-                }
-            }
-        }
     }
 
     private void removeDeadEnemies() {
@@ -203,7 +215,9 @@ public class Game {
         }
 
         drawHud();
-        if (state != State.PLAYING) {
+        if (state == State.PAUSED) {
+            drawPauseMenu();
+        } else if (state != State.PLAYING) {
             drawOverlay();
         }
     }
@@ -214,6 +228,40 @@ public class Game {
         } else {
             drawPlaceholder(e);
         }
+        if (e instanceof Brick brick && brick.getDrop() != null) {
+            drawBrickDropIndicator(brick);
+        }
+    }
+
+    private void drawBrickDropIndicator(Brick brick) {
+        Item item = brick.getDrop();
+        String label;
+        Color color;
+        if (item instanceof HealthItem) {
+            label = "H";
+            color = Color.HOTPINK;
+        } else if (item instanceof CooldownItem) {
+            label = "C";
+            color = Color.CYAN;
+        } else if (item instanceof FlameItem) {
+            label = "F";
+            color = Color.ORANGERED;
+        } else if (item instanceof SpeedItem) {
+            label = "S";
+            color = Color.GOLD;
+        } else {
+            return;
+        }
+
+        double badgeSize = 17;
+        double x = brick.getX() + GameMap.TILE_SIZE - badgeSize - 2;
+        double y = brick.getY() + 2;
+        gc.setFill(Color.color(0, 0, 0, 0.85));
+        gc.fillRoundRect(x, y, badgeSize, badgeSize, 5, 5);
+        gc.setFill(color);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.fillText(label, x + badgeSize / 2, y + 13);
     }
 
     private void drawPlaceholder(Entity e) {
@@ -266,6 +314,9 @@ public class Game {
                 + "     Điểm: " + player.getScore()
                 + "     Tầm lửa: " + player.getBlastRange();
         gc.fillText(text, 16, y + 31);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        gc.fillText("Dấu trên gạch: H = Máu | C = Giảm hồi bom | F = Tầm lửa | S = Tốc độ",
+                650, y + 30);
     }
 
     private void drawOverlay() {
@@ -278,7 +329,103 @@ public class Game {
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 48));
         gc.fillText(title, WIDTH / 2.0, HEIGHT / 2.0 - 20);
         gc.setFont(Font.font("Arial", 22));
-        gc.fillText("Điểm: " + player.getScore() + "   -   Nhấn ENTER để chơi lại",
-                WIDTH / 2.0, HEIGHT / 2.0 + 30);
+        gc.fillText("Điểm: " + player.getScore() + "   -   ENTER: chơi lại   ESC: về menu", WIDTH / 2.0, HEIGHT / 2.0 + 30);
+    }
+
+    private void drawPauseMenu() {
+        gc.setFill(Color.color(0, 0, 0, 0.65));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 48));
+        gc.fillText("TẠM DỪNG", WIDTH / 2.0, PAUSE_TOP - 40);
+
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 28));
+        for (int i = 0; i < PAUSE_OPTIONS.length; i++) {
+            double top = PAUSE_TOP + i * PAUSE_ITEM_H;
+            boolean selected = i == pauseIndex;
+            if (selected) {
+                gc.setFill(Color.color(1, 1, 1, 0.15));
+                gc.fillRoundRect(WIDTH / 2.0 - PAUSE_ITEM_W / 2, top, PAUSE_ITEM_W, PAUSE_ITEM_H - 4, 14, 14);
+            }
+            gc.setFill(selected ? Color.GOLD : Color.WHITE);
+            gc.fillText(PAUSE_OPTIONS[i], WIDTH / 2.0, top + 30);
+        }
+
+        gc.setFill(Color.LIGHTGRAY);
+        gc.setFont(Font.font("Arial", 18));
+        gc.fillText("Chuột hoặc Lên/Xuống: chọn    Enter / Click: xác nhận    Esc: tiếp tục", WIDTH / 2.0, PAUSE_TOP + PAUSE_OPTIONS.length * PAUSE_ITEM_H + 40);
+    }
+
+    public void setOnExit(Runnable onExit) {
+        this.onExit = onExit;
+    }
+
+    public void stop() {
+        timer.stop();
+    }
+
+    private void updatePauseMenu() {
+        if (input.wasPressed(KeyCode.ESCAPE)) {
+            state = State.PLAYING;
+            return;
+        }
+        int n = PAUSE_OPTIONS.length;
+        if (input.wasPressed(KeyCode.UP)) {
+            pauseIndex = (pauseIndex + n - 1) % n;
+        }
+        if (input.wasPressed(KeyCode.DOWN)) {
+            pauseIndex = (pauseIndex + 1) % n;
+        }
+        if (input.wasPressed(KeyCode.ENTER)) {
+            activatePauseOption();
+        }
+    }
+
+    private void exitToMenu() {
+        stop();
+        if (onExit != null) {
+            onExit.run();
+        }
+    }
+
+    private int pauseOptionAt(double mx, double my) {
+        if (Math.abs(mx - WIDTH / 2.0) > PAUSE_ITEM_W / 2) {
+            return -1;
+        }
+        int i = (int) Math.floor((my - PAUSE_TOP) / PAUSE_ITEM_H);
+        return (i >= 0 && i < PAUSE_OPTIONS.length) ? i : -1;
+    }
+
+    private void onMouseMoved(Canvas canvas, double mx, double my) {
+        if (state != State.PAUSED) {
+            canvas.setCursor(Cursor.DEFAULT);
+            return;
+        }
+        int i = pauseOptionAt(mx, my);
+        if (i >= 0) {
+            pauseIndex = i;
+        }
+        canvas.setCursor(i >= 0 ? Cursor.HAND : Cursor.DEFAULT);
+    }
+
+    private void onMouseClicked(double mx, double my) {
+        if (state != State.PAUSED) {
+            return;
+        }
+        int i = pauseOptionAt(mx, my);
+        if (i >= 0) {
+            pauseIndex = i;
+            activatePauseOption();
+        }
+    }
+
+    private void activatePauseOption() {
+        switch (pauseIndex) {
+            case 0 -> state = State.PLAYING;
+            case 1 -> startNewGame();
+            default -> exitToMenu();
+        }
     }
 }

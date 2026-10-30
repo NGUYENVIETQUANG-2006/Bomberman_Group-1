@@ -3,8 +3,8 @@ package bomb;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Player extends GameCharacter {
-    private static final double BASE_SPEED = 160;
-    private static final double MAX_SPEED = 240;
+    private static final double BASE_SPEED = 120;
+    private static final double MAX_SPEED = 200;
     private static final double SPEED_STEP = 20;
 
     private static final double BASE_COOLDOWN = 1.0;

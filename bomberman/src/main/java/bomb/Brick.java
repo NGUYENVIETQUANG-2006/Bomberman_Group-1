@@ -1,11 +1,16 @@
 package bomb;
 
 public class Brick extends Entity {
-    private boolean destroyed = false;
-    private final ItemSpawner itemSpawner = new ItemSpawner();
- 
+    private boolean destroyed = false; 
+    private final Item drop;
+
     public Brick(double x, double y) {
+        this(x, y, null);
+    }
+
+    public Brick(double x, double y, Item drop) {
         super(x, y);
+        this.drop = drop;
     }
  
     @Override
@@ -19,12 +24,12 @@ public class Brick extends Entity {
     public void destroy() {
         destroyed = true;
     }
-
-    Item rollDrop() {
-        return itemSpawner.rollDrop(x, y);
-    }
  
     public boolean isDestroyed() {
         return destroyed;
+    }
+
+    public Item getDrop() {
+        return drop;
     }
 }
