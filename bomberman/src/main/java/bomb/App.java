@@ -18,7 +18,7 @@ import main.ScoreboardMenu;
 public class App extends Application {
     private static final Path KEYS_FILE = Path.of(System.getProperty("user.home"), ".bomberman", "keys_p1.properties");
 
-    private final KeysBinding keys = KeysBinding.arrows();
+    private final KeysBinding keys = KeysBinding.wasd();
     private Stage stage;
 
     @Override
