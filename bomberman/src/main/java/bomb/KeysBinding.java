@@ -28,14 +28,6 @@ public class KeysBinding {
         keys.putAll(defaults);
     }
 
-    public static KeysBinding arrows() {
-        return new KeysBinding(KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.DIGIT0);
-    }
-
-    public static KeysBinding wasd() {
-        return new KeysBinding(KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D, KeyCode.SPACE);
-    }
-
     public KeyCode get(Action action) {
         return keys.get(action);
     }

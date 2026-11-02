@@ -206,7 +206,7 @@ public class Game {
             return;
         }
         boolean onPortal = map.getTile(player.getRow(), player.getCol()) instanceof Portal;
-        if (onPortal /*&& map.getEnemies().isEmpty()*/) {
+        if (onPortal && map.getEnemies().isEmpty()) {
             nextLevel();
             if (state == State.VICTORY) recordScore();
         }
