@@ -1,6 +1,7 @@
 package bomb;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 
 public class Player extends GameCharacter {
     private static final double BASE_SPEED = 120;
@@ -14,6 +15,24 @@ public class Player extends GameCharacter {
     private static final int START_HEALTH = 3;
     private static final int MAX_HEALTH = 5;
     private static final double INVINCIBLE_TIME = 1.5;
+    private static final double WALK_FRAME_TIME = 0.15;
+    private static final long DEAD_FRAME_TIME_NANOS = 150_000_000L;
+
+    private static final Image LOOKING_FRONT = loadImage("looking_front.png");
+    private static final Image LOOKING_UP = loadImage("Looking_up.png");
+    private static final Image LOOKING_LEFT = loadImage("Looking_left.png");
+    private static final Image LOOKING_RIGHT = loadImage("Looking_right.png");
+    private static final Image WALKING_UP_LEFT = loadImage("walkingup_leftfoot.png");
+    private static final Image WALKING_UP_RIGHT = loadImage("walkingup_righfoot.png");
+    private static final Image WALKING_DOWN_LEFT = loadImage("walkingdown_leftfoot.png");
+    private static final Image WALKING_DOWN_RIGHT = loadImage("walkingdown_rightfoot.png");
+    private static final Image WALKING_LEFT_LEFT = loadImage("walking_left_leftfoot.png");
+    private static final Image WALKING_LEFT_RIGHT = loadImage("walking_left_rightfoot.png");
+    private static final Image WALKING_RIGHT_LEFT = loadImage("walking_right_leftfoot.png");
+    private static final Image WALKING_RIGHT_RIGHT = loadImage("walking_right_rightfoot.png");
+    private static final Image DEAD_FRAME_1 = loadImage("dead_frame1.png");
+    private static final Image DEAD_FRAME_2 = loadImage("dead_frame2.png");
+    private static final Image DEAD_FRAME_3 = loadImage("dead_frame3.png");
 
     private static final int START_BLAST_RANGE = 1;
     private static final int MAX_BLAST_RANGE = 3;
@@ -28,16 +47,30 @@ public class Player extends GameCharacter {
     private double cooldownTimer = 0;
     private final InputHandler control;
     private final KeysBinding keys;
+    private Direction facing = Direction.DOWN;
+    private Direction walkingDirection;
+    private boolean walking;
+    private boolean rightFoot;
+    private double walkFrameTimer;
+    private long deathStartedNanos;
+
+    private static Image loadImage(String name) {
+        return new Image(Player.class.getResource("/picture/bomber/" + name).toExternalForm());
+    }
 
     public Player(double x, double y, InputHandler control, KeysBinding keys) {
         super(x, y, BASE_SPEED, MAX_SPEED);
         this.control = control;
         this.keys = keys;
+        setImage(LOOKING_FRONT);
     }
 
     @Override
     public void update(double dt) {
-        if (!isAlive() || map == null) {
+        if (!isAlive()) {
+            return;
+        }
+        if (map == null) {
             return;
         }
 
@@ -51,11 +84,23 @@ public class Player extends GameCharacter {
         Direction d = readDirection();
         if (d != null) {
             direction = d;
+            facing = d;
             if (hasClearCenterPath(d)) {
+                double previousX = x;
+                double previousY = y;
                 moveGridAligned(d, dt);
+                if (Math.abs(x - previousX) > 1e-6 || Math.abs(y - previousY) > 1e-6) {
+                    updateWalkingAnimation(d, dt);
+                } else {
+                    stopWalking();
+                }
             } else {
-                clearBlockedDirection(d);
+                stopWalking();
+                setImage(standingImage(d));
             }
+        } else {
+            stopWalking();
+            setImage(standingImage(facing));
         }
 
         if (control.wasPressed(keys.get(KeysBinding.Action.BOMB))) {
@@ -138,6 +183,45 @@ public class Player extends GameCharacter {
         direction = null;
     }
 
+    private void updateWalkingAnimation(Direction d, double dt) {
+        if (!walking || walkingDirection != d) {
+            walking = true;
+            walkingDirection = d;
+            rightFoot = false;
+            walkFrameTimer = 0;
+        }
+        walkFrameTimer += dt;
+        while (walkFrameTimer >= WALK_FRAME_TIME) {
+            walkFrameTimer -= WALK_FRAME_TIME;
+            rightFoot = !rightFoot;
+        }
+        setImage(walkingImage(d, rightFoot));
+    }
+
+    private void stopWalking() {
+        walking = false;
+        walkingDirection = null;
+        walkFrameTimer = 0;
+    }
+
+    private Image standingImage(Direction d) {
+        return switch (d) {
+            case UP -> LOOKING_UP;
+            case DOWN -> LOOKING_FRONT;
+            case LEFT -> LOOKING_LEFT;
+            case RIGHT -> LOOKING_RIGHT;
+        };
+    }
+
+    private Image walkingImage(Direction d, boolean useRightFoot) {
+        return switch (d) {
+            case UP -> useRightFoot ? WALKING_UP_RIGHT : WALKING_UP_LEFT;
+            case DOWN -> useRightFoot ? WALKING_DOWN_RIGHT : WALKING_DOWN_LEFT;
+            case LEFT -> useRightFoot ? WALKING_LEFT_RIGHT : WALKING_LEFT_LEFT;
+            case RIGHT -> useRightFoot ? WALKING_RIGHT_RIGHT : WALKING_RIGHT_LEFT;
+        };
+    }
+
     private Direction readDirection() {
         for (javafx.scene.input.KeyCode key : control.getHeldKeysNewestFirst()) {
             Direction candidate = directionForAction(keys.actionFor(key));
@@ -188,6 +272,8 @@ public class Player extends GameCharacter {
         health--;
         if (health <= 0) {
             super.kill();
+            deathStartedNanos = System.nanoTime();
+            setImage(DEAD_FRAME_1);
         } else {
             invincibleTimer = INVINCIBLE_TIME;
         }
@@ -228,9 +314,28 @@ public class Player extends GameCharacter {
 
     @Override
     public void render(GraphicsContext gc) {
+        if (!isAlive()) {
+            long elapsed = Math.max(0, System.nanoTime() - deathStartedNanos);
+            int frame = (int) Math.min(2, elapsed / DEAD_FRAME_TIME_NANOS);
+            setImage(switch (frame) {
+                case 0 -> DEAD_FRAME_1;
+                case 1 -> DEAD_FRAME_2;
+                default -> DEAD_FRAME_3;
+            });
+            drawPlayerImage(gc);
+            return;
+        }
         if (isInvincible() && ((int) (invincibleTimer * 10)) % 2 == 0) {
             return;
         }
-        super.render(gc);
+        drawPlayerImage(gc);
+    }
+
+    private void drawPlayerImage(GraphicsContext gc) {
+        double tileSize = GameMap.TILE_SIZE;
+        double scale = Math.min(tileSize / img.getWidth(), tileSize / img.getHeight());
+        double width = img.getWidth() * scale;
+        double height = img.getHeight() * scale;
+        gc.drawImage(img, x + (tileSize - width) / 2, y + (tileSize - height) / 2, width, height);
     }
 }

@@ -3,22 +3,43 @@ package bomb;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.image.Image;
+
 public class Bomb extends Entity {
+    private static final double ANIMATION_FRAME_TIME = 0.33;
+    private static final Image[] ANIMATION_FRAMES = {
+            loadFrame("frame1.png"),
+            loadFrame("frame2.png"),
+            loadFrame("frame3.png")
+    };
     private static final double FUSE_TIME = 2.0;   // giây
 
     private double timer = FUSE_TIME;
+    private double animationTimer;
+    private int animationFrame;
     private final int blastRange;
     private boolean exploded = false;
+
+    private static Image loadFrame(String name) {
+        return new Image(Bomb.class.getResource("/animation/bomb_animation/" + name).toExternalForm());
+    }
 
     public Bomb(double x, double y, int blastRange) {
         super(x, y);
         this.blastRange = blastRange;
+        setImage(ANIMATION_FRAMES[0]);
     }
 
     @Override
     public void update(double dt) {
         if (!exploded) {
             timer -= dt;
+            animationTimer += dt;
+            while (animationTimer >= ANIMATION_FRAME_TIME) {
+                animationTimer -= ANIMATION_FRAME_TIME;
+                animationFrame = (animationFrame + 1) % ANIMATION_FRAMES.length;
+                setImage(ANIMATION_FRAMES[animationFrame]);
+            }
         }
     }
 

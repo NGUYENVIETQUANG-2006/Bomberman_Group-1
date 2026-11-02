@@ -181,10 +181,12 @@ public class Game {
     private void removeDeadEnemies() {
         for (Enemy e : map.getEnemies()) {
             if (!e.isAlive()) {
-                player.addScore(ENEMY_SCORE);
+                if (e.markScoreAwarded()) {
+                    player.addScore(ENEMY_SCORE);
+                }
             }
         }
-        map.getEnemies().removeIf(e -> !e.isAlive());
+        map.getEnemies().removeIf(Enemy::isDeadDisplayExpired);
     }
 
     private void pickUpItem() {

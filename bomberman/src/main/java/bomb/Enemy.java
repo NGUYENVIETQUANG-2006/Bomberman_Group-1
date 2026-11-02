@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javafx.scene.image.Image;
+
 public abstract class Enemy extends GameCharacter {
     private static final double TOUCH_DISTANCE = GameMap.TILE_SIZE * 0.7;
     private static final double WANDER_KEEP_STRAIGHT = 0.7;
+    private static final double DEAD_DISPLAY_TIME = 1.0;
 
     protected final Random random = new Random();
 
     private boolean moving = false;
     private double stepTarget = 0;
+    private Image deadImage;
+    private double deadTimeRemaining;
+    private boolean scoreAwarded;
 
     protected Enemy(double x, double y, double speed) {
         super(x, y, speed, speed);
@@ -19,9 +25,28 @@ public abstract class Enemy extends GameCharacter {
 
     public abstract Direction targetSearch(Player player);
 
+    protected void setAnimationImages(Image movingImage, Image deadImage) {
+        setImage(movingImage);
+        this.deadImage = deadImage;
+    }
+
+    @Override
+    public void onFlameHit() {
+        if (!isAlive()) {
+            return;
+        }
+        super.onFlameHit();
+        setImage(deadImage);
+        deadTimeRemaining = DEAD_DISPLAY_TIME;
+    }
+
     @Override
     public void update(double dt) {
-        if (!isAlive() || map == null) {
+        if (!isAlive()) {
+            deadTimeRemaining = Math.max(0, deadTimeRemaining - dt);
+            return;
+        }
+        if (map == null) {
             return;
         }
 
@@ -49,6 +74,18 @@ public abstract class Enemy extends GameCharacter {
             }
         }
         killPlayerIfTouching();
+    }
+
+    public boolean isDeadDisplayExpired() {
+        return !isAlive() && deadTimeRemaining <= 0;
+    }
+
+    public boolean markScoreAwarded() {
+        if (scoreAwarded) {
+            return false;
+        }
+        scoreAwarded = true;
+        return true;
     }
 
     private void snapToGrid() {
