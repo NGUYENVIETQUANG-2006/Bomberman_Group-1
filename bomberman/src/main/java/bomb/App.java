@@ -9,6 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
 import main.MainMenu;
@@ -17,8 +18,7 @@ import main.ScoreboardMenu;
 
 public class App extends Application {
     private static final Path KEYS_FILE = Path.of(System.getProperty("user.home"), ".bomberman", "keys_p1.properties");
-
-    private final KeysBinding keys = KeysBinding.wasd();
+    private final KeysBinding keys = new KeysBinding(KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE);
     private Stage stage;
 
     @Override
