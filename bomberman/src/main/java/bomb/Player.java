@@ -15,7 +15,7 @@ public class Player extends GameCharacter {
     private static final int START_HEALTH = 3;
     private static final int MAX_HEALTH = 5;
     private static final double INVINCIBLE_TIME = 1.5;
-    private static final double WALK_FRAME_TIME = 0.15;
+    private static final double WALK_FRAME_TIME = 0.3;
     private static final long DEAD_FRAME_TIME_NANOS = 150_000_000L;
 
     private static final Image LOOKING_FRONT = loadImage("looking_front.png");

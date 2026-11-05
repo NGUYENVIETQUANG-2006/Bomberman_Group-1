@@ -1,6 +1,12 @@
 package bomb;
 
+import javafx.scene.image.Image;
+
 public class Brick extends Entity {
+    private static final Image BRICK_IMAGE = new Image(Brick.class.getResource(
+            "/picture/Brick/PalmOS - Bomberman for Palm OS - Miscellaneous - Bomberman, Enemies, Bombs, Items, & Blocks_03.png")
+            .toExternalForm());
+
     private boolean destroyed = false; 
     private final Item drop;
 
@@ -11,6 +17,7 @@ public class Brick extends Entity {
     public Brick(double x, double y, Item drop) {
         super(x, y);
         this.drop = drop;
+        setImage(BRICK_IMAGE);
     }
  
     @Override
