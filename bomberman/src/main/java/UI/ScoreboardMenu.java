@@ -1,4 +1,4 @@
-package main;
+package UI;
 
 import bomb.GameStorage;
 import javafx.geometry.Pos;

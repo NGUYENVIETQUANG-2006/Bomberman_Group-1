@@ -12,19 +12,16 @@ import java.util.List;
 import java.util.Properties;
 
 public final class GameStorage {
-    private static final Path DIRECTORY = Path.of("src", "main", "resources", "saves");
+    private static final Path DIRECTORY = Path.of("bomberman", "src", "main", "resources", "saves");
     private static final Path SAVE_FILE = DIRECTORY.resolve("save.properties");
     private static final Path SCORE_FILE = DIRECTORY.resolve("scoreboard.csv");
 
     private GameStorage() {}
 
-    public record Save(int level, double x, double y, int health, int score, double speed, int blastRange,
-                       double bombCooldown, long elapsedMillis, String playerName) {
-        public Save(int level, double x, double y, int health, int score, double speed, int blastRange,
-                    double bombCooldown, long elapsedMillis) {
+    public record Save(int level, double x, double y, int health, int score, double speed, int blastRange, double bombCooldown, long elapsedMillis, String playerName) {
+        public Save(int level, double x, double y, int health, int score, double speed, int blastRange, double bombCooldown, long elapsedMillis) {
             this(level, x, y, health, score, speed, blastRange, bombCooldown, elapsedMillis, "Người chơi");
         }
-
         public Save(int level, double x, double y, int health, int score, double speed, int blastRange, double bombCooldown) {
             this(level, x, y, health, score, speed, blastRange, bombCooldown, 0, "Người chơi");
         }
@@ -74,12 +71,9 @@ public final class GameStorage {
     public static void recordScore(String name, int score, long elapsedMillis) throws IOException {
         List<ScoreEntry> entries = new ArrayList<>(loadScores());
         entries.add(new ScoreEntry(cleanName(name), score, Math.max(0, elapsedMillis), LocalDate.now()));
-        entries.sort(Comparator.comparingInt(ScoreEntry::score).reversed()
-                .thenComparingLong(ScoreEntry::elapsedMillis));
+        entries.sort(Comparator.comparingInt(ScoreEntry::score).reversed().thenComparingLong(ScoreEntry::elapsedMillis));
         Files.createDirectories(DIRECTORY);
-        List<String> lines = entries.stream().limit(10)
-                .map(e -> escapeCsv(e.name()) + "," + e.score() + "," + e.elapsedMillis() + "," + e.date())
-                .toList();
+        List<String> lines = entries.stream().limit(10).map(e -> escapeCsv(e.name()) + "," + e.score() + "," + e.elapsedMillis() + "," + e.date()).toList();
         Files.write(SCORE_FILE, lines);
     }
 
@@ -91,13 +85,10 @@ public final class GameStorage {
             if (columns.length != 3 && columns.length != 4) continue;
             try {
                 boolean hasDuration = columns.length == 4;
-                entries.add(new ScoreEntry(unescapeCsv(columns[0]), Integer.parseInt(columns[1]),
-                        hasDuration ? Math.max(0, Long.parseLong(columns[2])) : 0,
-                        LocalDate.parse(columns[hasDuration ? 3 : 2])));
+                entries.add(new ScoreEntry(unescapeCsv(columns[0]), Integer.parseInt(columns[1]), hasDuration ? Math.max(0, Long.parseLong(columns[2])) : 0, LocalDate.parse(columns[hasDuration ? 3 : 2])));
             } catch (RuntimeException ignored) {}
         }
-        entries.sort(Comparator.comparingInt(ScoreEntry::score).reversed()
-                .thenComparingLong(ScoreEntry::elapsedMillis));
+        entries.sort(Comparator.comparingInt(ScoreEntry::score).reversed().thenComparingLong(ScoreEntry::elapsedMillis));
         return entries.stream().limit(10).toList();
     }
 

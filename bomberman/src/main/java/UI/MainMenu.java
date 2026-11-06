@@ -1,4 +1,4 @@
-package main;
+package UI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
 public class MainMenu extends VBox {
-
     public MainMenu(Consumer<String> onPlay, Runnable onContinue, Runnable onScores, Runnable onSettings, Runnable onQuit) {
         setAlignment(Pos.CENTER);
         setSpacing(18);
@@ -54,8 +53,7 @@ public class MainMenu extends VBox {
         getChildren().addAll(namePrompt, playerName, startButton, backButton);
     }
 
-    private void showNameEntry(List<Button> mainButtons, Label prompt, TextField playerName,
-                               Button startButton, Button backButton) {
+    private void showNameEntry(List<Button> mainButtons, Label prompt, TextField playerName, Button startButton, Button backButton) {
         mainButtons.forEach(button -> setVisibleAndManaged(button, false));
         setVisibleAndManaged(prompt, true);
         setVisibleAndManaged(playerName, true);
@@ -65,8 +63,7 @@ public class MainMenu extends VBox {
         playerName.selectAll();
     }
 
-    private void showMainOptions(List<Button> mainButtons, Label prompt, TextField playerName,
-                                 Button startButton, Button backButton) {
+    private void showMainOptions(List<Button> mainButtons, Label prompt, TextField playerName, Button startButton, Button backButton) {
         mainButtons.forEach(button -> setVisibleAndManaged(button, true));
         setVisibleAndManaged(prompt, false);
         setVisibleAndManaged(playerName, false);
