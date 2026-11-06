@@ -1,4 +1,4 @@
-package bomb;
+package core;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,6 +14,8 @@ import javafx.stage.Stage;
 
 import UI.MainMenu;
 import UI.SettingsMenu;
+import core.input.InputHandler;
+import core.input.KeysBinding;
 import UI.ScoreboardMenu;
 
 public class App extends Application {

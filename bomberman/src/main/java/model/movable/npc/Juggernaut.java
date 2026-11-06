@@ -1,9 +1,13 @@
-package bomb;
+package model.movable.npc;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 import javafx.scene.image.Image;
+
+import model.movable.Player;
+import component.Enemy;
+import core.input.Direction;
 
 public class Juggernaut extends Enemy {
     private static final double SPEED = 100;

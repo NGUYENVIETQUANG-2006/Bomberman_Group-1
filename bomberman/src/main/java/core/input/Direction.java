@@ -1,4 +1,4 @@
-package bomb;
+package core.input;
 
 public enum Direction {
     UP(0, -1),

@@ -1,4 +1,4 @@
-package bomb;
+package core.input;
 
 import java.io.IOException;
 import java.io.InputStream;

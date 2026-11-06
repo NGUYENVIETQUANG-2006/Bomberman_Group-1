@@ -1,12 +1,13 @@
-package bomb;
+package component;
 
+import core.map.GameMap;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public abstract class Entity {
     protected double x;
     protected double y;
-    protected Image img;
+    public Image img;
 
     public Entity(double x, double y) {
         this.x = x;

@@ -1,6 +1,10 @@
-package bomb;
+package model.movable.npc;
 
 import javafx.scene.image.Image;
+
+import component.Enemy;
+import core.input.Direction;
+import model.movable.Player;
 
 public class Grunt extends Enemy {
     private static final double SPEED = 60;

@@ -1,6 +1,11 @@
-package bomb;
+package model.nonmovable;
 
+import component.Enemy;
+import component.Entity;
+import core.input.Direction;
+import core.map.GameMap;
 import javafx.scene.image.Image;
+import model.movable.Player;
 
 public class Flame extends Entity {
     private static final double DURATION = 0.5;

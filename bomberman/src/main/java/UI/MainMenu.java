@@ -29,7 +29,7 @@ public class MainMenu extends VBox {
         List<Button> mainButtons = new ArrayList<>();
         Button playButton = menuButton("Chơi mới", () -> {});
         mainButtons.add(playButton);
-        if (bomb.GameStorage.hasSave()) mainButtons.add(menuButton("Tiếp tục", onContinue));
+        if (core.GameStorage.hasSave()) mainButtons.add(menuButton("Tiếp tục", onContinue));
         mainButtons.add(menuButton("Bảng xếp hạng", onScores));
         mainButtons.add(menuButton("Cài đặt", onSettings));
         mainButtons.add(menuButton("Thoát", onQuit));

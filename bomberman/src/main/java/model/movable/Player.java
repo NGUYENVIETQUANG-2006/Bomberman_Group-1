@@ -1,7 +1,12 @@
-package bomb;
+package model.movable;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+
+import component.GameCharacter;
+import core.input.*;
+import core.map.*;
+import model.nonmovable.*;
 
 public class Player extends GameCharacter {
     private static final double BASE_SPEED = 120;

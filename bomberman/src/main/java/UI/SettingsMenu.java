@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.Map;
- 
+
+import core.input.KeysBinding;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,8 +13,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import bomb.KeysBinding;
  
 public class SettingsMenu extends VBox {
     private final KeysBinding keys;

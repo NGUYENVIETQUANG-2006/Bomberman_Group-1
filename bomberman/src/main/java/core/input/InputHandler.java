@@ -1,4 +1,4 @@
-package bomb;
+package core.input;
 
 import java.util.ArrayList;
 import java.util.Collections;

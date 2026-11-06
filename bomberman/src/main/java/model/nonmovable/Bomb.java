@@ -1,9 +1,13 @@
-package bomb;
+package model.nonmovable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.image.Image;
+
+import component.Entity;
+import core.map.GameMap;
+import core.input.Direction;
 
 public class Bomb extends Entity {
     private static final double ANIMATION_FRAME_TIME = 0.33;
@@ -76,8 +80,7 @@ public class Bomb extends Entity {
                     break;
                 }
 
-                boolean endpoint = i == blastRange || tile instanceof Brick
-                        || isBlockedBeyond(nr, nc, d, map);
+                boolean endpoint = i == blastRange || tile instanceof Brick || isBlockedBeyond(nr, nc, d, map);
                 flames.add(newFlame(nr, nc, map, Flame.imageFor(d, blastRange, endpoint)));
 
                 if (tile instanceof Brick brick) {

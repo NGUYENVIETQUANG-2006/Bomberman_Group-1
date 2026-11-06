@@ -1,5 +1,6 @@
-package bomb;
+package model.nonmovable;
 
+import component.Entity;
 import javafx.scene.image.Image;
 
 public class Wall extends Entity {

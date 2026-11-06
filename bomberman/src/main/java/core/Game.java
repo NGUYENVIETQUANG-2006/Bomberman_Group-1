@@ -1,8 +1,17 @@
-package bomb;
+package core;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+
+import component.*;
+import core.input.*;
+import core.map.*;
+import model.item.*;
+import model.movable.Player;
+import model.movable.npc.*;
+import model.nonmovable.*;
+
 import java.io.IOException;
 
 import javafx.animation.AnimationTimer;

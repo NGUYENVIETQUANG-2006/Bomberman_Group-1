@@ -1,4 +1,9 @@
-package bomb;
+package core.map;
+
+import component.Entity;
+import model.nonmovable.*;
+import model.item.*;
+import model.movable.npc.*;
 
 /**
  *

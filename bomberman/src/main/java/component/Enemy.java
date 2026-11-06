@@ -1,10 +1,13 @@
-package bomb;
+package component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import core.input.Direction;
+import core.map.GameMap;
 import javafx.scene.image.Image;
+import model.movable.Player;
 
 public abstract class Enemy extends GameCharacter {
     private static final double TOUCH_DISTANCE = GameMap.TILE_SIZE * 0.7;

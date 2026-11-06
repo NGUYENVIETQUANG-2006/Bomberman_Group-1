@@ -1,4 +1,6 @@
-package bomb;
+package component;
+
+import model.movable.Player;
 
 public abstract class Item extends Entity {
  

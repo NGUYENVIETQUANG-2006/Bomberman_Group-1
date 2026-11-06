@@ -1,7 +1,12 @@
-package bomb;
+package core.map;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import component.Enemy;
+import component.Entity;
+import model.nonmovable.*;
+import model.movable.Player;
 
 public class GameMap {
     public static final int TILE_SIZE = 48;

@@ -1,5 +1,7 @@
-package bomb;
+package model.nonmovable;
 
+import component.Entity;
+import component.Item;
 import javafx.scene.image.Image;
 
 public class Brick extends Entity {

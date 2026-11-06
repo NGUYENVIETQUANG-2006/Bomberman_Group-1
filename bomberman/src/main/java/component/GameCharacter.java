@@ -1,4 +1,8 @@
-package bomb;
+package component;
+
+import core.input.Direction;
+import core.map.GameMap;
+import model.nonmovable.Bomb;
 
 public abstract class GameCharacter extends Entity {
     private static final double MARGIN = GameMap.TILE_SIZE * 0.15;
