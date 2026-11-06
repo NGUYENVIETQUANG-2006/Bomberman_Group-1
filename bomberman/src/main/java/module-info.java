@@ -4,4 +4,5 @@ module bomberman {
     requires javafx.media;
 
     exports bomb;
+    exports UI;
 }

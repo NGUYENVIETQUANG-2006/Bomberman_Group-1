@@ -28,6 +28,7 @@ public class Game {
     private static final double MAX_DT = 0.05;
     private enum State { PLAYING, PAUSED, GAME_OVER, VICTORY }
     private final GraphicsContext gc;
+    private final Canvas canvas;
     private final InputHandler input;
     private final LevelLoader loader = new LevelLoader(new EntityFactory());
     private final AnimationTimer timer;
@@ -47,6 +48,7 @@ public class Game {
     private String playerName = "Người chơi";
 
     public Game(Canvas canvas, InputHandler input, KeysBinding keys) {
+        this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
         this.input = input;
         this.keys = keys;
@@ -226,6 +228,12 @@ public class Game {
     }
 
     private void render() {
+        double scaleX = canvas.getWidth() / WIDTH;
+        double scaleY = canvas.getHeight() / HEIGHT;
+        gc.save();
+        gc.setTransform(1, 0, 0, 1, 0, 0);
+        gc.scale(scaleX, scaleY);
+
         int tile = GameMap.TILE_SIZE;
 
         gc.setFill(Color.web("#2e7d32"));
@@ -252,6 +260,7 @@ public class Game {
         } else if (state != State.PLAYING) {
             drawOverlay();
         }
+        gc.restore();
     }
 
     private void draw(Entity e) {
@@ -438,7 +447,7 @@ public class Game {
             canvas.setCursor(Cursor.DEFAULT);
             return;
         }
-        int i = pauseOptionAt(mx, my);
+        int i = pauseOptionAt(mx * WIDTH / canvas.getWidth(), my * HEIGHT / canvas.getHeight());
         if (i >= 0) {
             pauseIndex = i;
         }
@@ -449,7 +458,7 @@ public class Game {
         if (state != State.PAUSED) {
             return;
         }
-        int i = pauseOptionAt(mx, my);
+        int i = pauseOptionAt(mx * WIDTH / canvas.getWidth(), my * HEIGHT / canvas.getHeight());
         if (i >= 0) {
             pauseIndex = i;
             activatePauseOption();

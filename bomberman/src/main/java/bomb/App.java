@@ -5,11 +5,11 @@ import java.nio.file.Path;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import UI.MainMenu;
@@ -17,7 +17,7 @@ import UI.SettingsMenu;
 import UI.ScoreboardMenu;
 
 public class App extends Application {
-    private static final Path KEYS_FILE = Path.of("bomberman", "src", "main", "resources", "saves", "keys_p1.properties");
+    private static final Path KEYS_FILE = Path.of("bomberman", "src", "resources", "saves", "keys_p1.properties");
     private final KeysBinding keys = new KeysBinding(KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE);
     private Stage stage;
 
@@ -27,7 +27,7 @@ public class App extends Application {
         keys.load(KEYS_FILE);
 
         stage.setTitle("Bomberman");
-        stage.setResizable(false);
+        stage.setResizable(true);
         showMainMenu();
         stage.show();
     }
@@ -62,7 +62,10 @@ public class App extends Application {
 
     private void startGame(GameStorage.Save savedGame, String playerName) {
         Canvas canvas = new Canvas(Game.WIDTH, Game.HEIGHT);
-        Scene scene = new Scene(new Group(canvas));
+        Pane gameRoot = new Pane(canvas);
+        canvas.widthProperty().bind(gameRoot.widthProperty());
+        canvas.heightProperty().bind(gameRoot.heightProperty());
+        Scene scene = new Scene(gameRoot, Game.WIDTH, Game.HEIGHT);
 
         InputHandler input = new InputHandler();
         input.attach(scene);
