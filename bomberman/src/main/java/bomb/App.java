@@ -12,9 +12,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-import main.MainMenu;
-import main.SettingsMenu;
-import main.ScoreboardMenu;
+import UI.MainMenu;
+import UI.SettingsMenu;
+import UI.ScoreboardMenu;
 
 public class App extends Application {
     private static final Path KEYS_FILE = Path.of("bomberman", "src", "main", "resources", "saves", "keys_p1.properties");
