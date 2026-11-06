@@ -23,7 +23,7 @@ public class Game {
     public static final int WIDTH = COLS * GameMap.TILE_SIZE;
     public static final int HEIGHT = ROWS * GameMap.TILE_SIZE + HUD_HEIGHT;
     private static final int MAX_LEVEL = 3;
-    private static final String LEVEL_PATH = "/bomb/maps/level%d.txt";
+    private static final String LEVEL_PATH = "/maps/level%d.txt";
     private static final int ENEMY_SCORE = 100;
     private static final double MAX_DT = 0.05;
     private enum State { PLAYING, PAUSED, GAME_OVER, VICTORY }
@@ -43,6 +43,8 @@ public class Game {
     private static final double PAUSE_ITEM_H = 44;
     private static final double PAUSE_ITEM_W = 320;
     private boolean scoreRecorded;
+    private long elapsedNanos;
+    private String playerName = "Người chơi";
 
     public Game(Canvas canvas, InputHandler input, KeysBinding keys) {
         this.gc = canvas.getGraphicsContext2D();
@@ -80,12 +82,19 @@ public class Game {
         timer.start();
     }
 
+    public void start(String playerName) {
+        this.playerName = playerName == null || playerName.isBlank() ? "Người chơi" : playerName.trim();
+        start();
+    }
+
     public void startSaved(GameStorage.Save save) {
         level = Math.max(1, Math.min(MAX_LEVEL, save.level()));
         state = State.PLAYING;
         loadLevel();
         player.setPosition(save.x(), save.y());
         player.restoreState(save.health(), save.score(), save.speed(), save.blastRange(), save.bombCooldown());
+        elapsedNanos = Math.max(0, save.elapsedMillis()) * 1_000_000L;
+        playerName = save.playerName() == null || save.playerName().isBlank() ? "Người chơi" : save.playerName();
         scoreRecorded = false;
         timer.start();
     }
@@ -95,6 +104,7 @@ public class Game {
         player = null;
         state = State.PLAYING;
         scoreRecorded = false;
+        elapsedNanos = 0;
         loadLevel();
     }
 
@@ -147,6 +157,7 @@ public class Game {
             return;
         }
 
+        elapsedNanos += (long) (dt * 1_000_000_000L);
         player.update(dt);
         for (Enemy e : new ArrayList<>(map.getEnemies())) {
             e.update(dt);
@@ -208,7 +219,7 @@ public class Game {
             return;
         }
         boolean onPortal = map.getTile(player.getRow(), player.getCol()) instanceof Portal;
-        if (onPortal && map.getEnemies().isEmpty()) {
+        if (onPortal /*&& map.getEnemies().isEmpty()*/) {
             nextLevel();
             if (state == State.VICTORY) recordScore();
         }
@@ -328,12 +339,13 @@ public class Game {
         gc.fillRect(0, y, WIDTH, HUD_HEIGHT);
 
         gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         gc.setTextAlign(TextAlignment.LEFT);
         String text = "Màn " + level + "/" + MAX_LEVEL
                 + "     Máu: " + player.getHealth()
                 + "     Điểm: " + player.getScore()
-                + "     Tầm lửa: " + player.getBlastRange();
+                + "     Tầm lửa: " + player.getBlastRange()
+                + "     Thời gian: " + GameStorage.formatDuration(elapsedNanos / 1_000_000L);
         gc.fillText(text, 16, y + 31);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         gc.fillText("Dấu trên gạch: H = Máu | C = Giảm hồi bom | F = Tầm lửa | S = Tốc độ",
@@ -350,7 +362,9 @@ public class Game {
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 48));
         gc.fillText(title, WIDTH / 2.0, HEIGHT / 2.0 - 20);
         gc.setFont(Font.font("Arial", 22));
-        gc.fillText("Điểm: " + player.getScore() + "   -   ENTER: chơi lại   ESC: về menu", WIDTH / 2.0, HEIGHT / 2.0 + 30);
+        gc.fillText("Điểm: " + player.getScore() + "   Thời gian: "
+                + GameStorage.formatDuration(elapsedNanos / 1_000_000L)
+                + "   -   ENTER: chơi lại   ESC: về menu", WIDTH / 2.0, HEIGHT / 2.0 + 30);
     }
 
     private void drawPauseMenu() {
@@ -454,7 +468,8 @@ public class Game {
     private void saveGame() {
         try {
             GameStorage.save(new GameStorage.Save(level, player.getX(), player.getY(), player.getHealth(),
-                    player.getScore(), player.getSpeed(), player.getBlastRange(), player.getBombCooldown()));
+                    player.getScore(), player.getSpeed(), player.getBlastRange(), player.getBombCooldown(),
+                    elapsedNanos / 1_000_000L, playerName));
             state = State.PLAYING;
         } catch (IOException e) {
             System.err.println("Không lưu được ván chơi: " + e.getMessage());
@@ -465,7 +480,7 @@ public class Game {
         if (scoreRecorded) return;
         scoreRecorded = true;
         try {
-            GameStorage.recordScore("Người chơi", player.getScore());
+            GameStorage.recordScore(playerName, player.getScore(), elapsedNanos / 1_000_000L);
         } catch (IOException e) {
             System.err.println("Không lưu được scoreboard: " + e.getMessage());
         }

@@ -33,14 +33,14 @@ public class App extends Application {
     }
 
     private void showMainMenu() {
-        show(new MainMenu(this::showGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
+        show(new MainMenu(this::startNewGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
     }
 
     private void continueGame() {
         try {
             showGame(GameStorage.load());
         } catch (IOException | RuntimeException e) {
-            show(new MainMenu(this::showGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
+            show(new MainMenu(this::startNewGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
         }
     }
 
@@ -52,11 +52,15 @@ public class App extends Application {
         show(new SettingsMenu(keys, KEYS_FILE, this::showMainMenu));
     }
 
-    private void showGame() {
-        showGame(null);
+    private void startNewGame(String playerName) {
+        startGame(null, playerName);
     }
 
     private void showGame(GameStorage.Save savedGame) {
+        startGame(savedGame, savedGame.playerName());
+    }
+
+    private void startGame(GameStorage.Save savedGame, String playerName) {
         Canvas canvas = new Canvas(Game.WIDTH, Game.HEIGHT);
         Scene scene = new Scene(new Group(canvas));
 
@@ -68,7 +72,7 @@ public class App extends Application {
 
         stage.setScene(scene);
         stage.sizeToScene();
-        if (savedGame == null) game.start(); else game.startSaved(savedGame);
+        if (savedGame == null) game.start(playerName); else game.startSaved(savedGame);
     }
 
     private void show(Parent root) {

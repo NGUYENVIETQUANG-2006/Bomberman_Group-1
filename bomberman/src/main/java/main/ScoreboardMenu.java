@@ -20,9 +20,11 @@ public class ScoreboardMenu extends VBox {
             if (scores.isEmpty()) {
                 getChildren().add(scoreLine("Chưa có điểm nào được ghi nhận"));
             } else {
+                getChildren().add(scoreLine("HẠNG  NGƯỜI CHƠI             ĐIỂM  THỜI GIAN  NGÀY"));
                 int rank = 1;
                 for (GameStorage.ScoreEntry entry : scores) {
-                    getChildren().add(scoreLine(String.format("%2d. %-18s %6d   %s", rank++, entry.name(), entry.score(), entry.date())));
+                    getChildren().add(scoreLine(String.format("%2d.   %-20.20s %6d   %8s  %s", rank++, entry.name(),
+                            entry.score(), GameStorage.formatDuration(entry.elapsedMillis()), entry.date())));
                 }
             }
         } catch (Exception e) {
