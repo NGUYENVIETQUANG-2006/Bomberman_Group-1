@@ -60,7 +60,7 @@ public class Bomb extends Entity {
 
         int r = getRow();
         int c = getCol();
-        flames.add(newFlame(r, c, map));
+        flames.add(newFlame(r, c, map, Flame.coreImage(blastRange)));
 
         for (Direction d : Direction.values()) {
             for (int i = 1; i <= blastRange; i++) {
@@ -76,7 +76,9 @@ public class Bomb extends Entity {
                     break;
                 }
 
-                flames.add(newFlame(nr, nc, map));
+                boolean endpoint = i == blastRange || tile instanceof Brick
+                        || isBlockedBeyond(nr, nc, d, map);
+                flames.add(newFlame(nr, nc, map, Flame.imageFor(d, blastRange, endpoint)));
 
                 if (tile instanceof Brick brick) {
                     brick.onFlameHit();
@@ -102,7 +104,13 @@ public class Bomb extends Entity {
         }
     }
 
-    private Flame newFlame(int r, int c, GameMap map) {
-        return new Flame(c * GameMap.TILE_SIZE, r * GameMap.TILE_SIZE, map);
+    private Flame newFlame(int r, int c, GameMap map, Image image) {
+        return new Flame(c * GameMap.TILE_SIZE, r * GameMap.TILE_SIZE, map, image);
+    }
+
+    private boolean isBlockedBeyond(int r, int c, Direction direction, GameMap map) {
+        int nextRow = r + direction.dy;
+        int nextCol = c + direction.dx;
+        return !map.inBounds(nextRow, nextCol) || map.getTile(nextRow, nextCol) instanceof Wall;
     }
 }
