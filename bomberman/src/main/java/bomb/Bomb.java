@@ -12,7 +12,7 @@ public class Bomb extends Entity {
             loadFrame("frame2.png"),
             loadFrame("frame3.png")
     };
-    private static final double FUSE_TIME = 2.0;   // giây
+    private static final double FUSE_TIME = 2.0;
 
     private double timer = FUSE_TIME;
     private double animationTimer;
