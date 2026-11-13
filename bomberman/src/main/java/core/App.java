@@ -2,7 +2,6 @@ package core;
 
 import java.io.IOException;
 import java.nio.file.Path;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Parent;
@@ -20,16 +19,19 @@ import UI.ScoreboardMenu;
 
 public class App extends Application {
     private static final Path KEYS_FILE = Path.of("bomberman", "src", "resources", "saves", "keys_p1.properties");
+    private static final Path DISPLAY_FILE = Path.of("bomberman", "src", "resources", "saves", "display.properties");
     private final KeysBinding keys = new KeysBinding(KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE);
     private Stage stage;
+    private DisplayResolution resolution = DisplayResolution.LOW;
 
     @Override
     public void start(Stage stage) throws IOException {
         this.stage = stage;
         keys.load(KEYS_FILE);
+        resolution = DisplayResolution.load(DISPLAY_FILE);
 
         stage.setTitle("Bomberman");
-        stage.setResizable(true);
+        stage.setResizable(false);
         showMainMenu();
         stage.show();
     }
@@ -51,7 +53,11 @@ public class App extends Application {
     }
 
     private void showSettings() {
-        show(new SettingsMenu(keys, KEYS_FILE, this::showMainMenu));
+        show(new SettingsMenu(keys, KEYS_FILE, resolution, this::applyResolution, this::showMainMenu));
+    }
+
+    private void applyResolution(DisplayResolution selected) {
+        resolution = selected;
     }
 
     private void startNewGame(String playerName) {
@@ -67,7 +73,7 @@ public class App extends Application {
         Pane gameRoot = new Pane(canvas);
         canvas.widthProperty().bind(gameRoot.widthProperty());
         canvas.heightProperty().bind(gameRoot.heightProperty());
-        Scene scene = new Scene(gameRoot, Game.WIDTH, Game.HEIGHT);
+        Scene scene = new Scene(gameRoot, resolution.width(), resolution.height());
 
         InputHandler input = new InputHandler();
         input.attach(scene);
@@ -81,7 +87,7 @@ public class App extends Application {
     }
 
     private void show(Parent root) {
-        stage.setScene(new Scene(root, Game.WIDTH, Game.HEIGHT));
+        stage.setScene(new Scene(root, resolution.width(), resolution.height()));
         stage.sizeToScene();
     }
 

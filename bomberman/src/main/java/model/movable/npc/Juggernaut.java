@@ -11,13 +11,9 @@ import core.input.Direction;
 
 public class Juggernaut extends Enemy {
     private static final double SPEED = 100;
-    private static final int DETECT_RANGE = 8;
-    private static final Image MOVING_IMAGE = new Image(
-            Juggernaut.class.getResource("/animation/enemy2_animation/moving.gif")
-                    .toExternalForm());
-    private static final Image DEAD_IMAGE = new Image(
-            Juggernaut.class.getResource("/animation/enemy2_animation/dead.png")
-                    .toExternalForm());
+    private static final int DETECT_RANGE = 5;
+    private static final Image MOVING_IMAGE = new Image(Juggernaut.class.getResource("/animation/enemy2_animation/moving.gif").toExternalForm());
+    private static final Image DEAD_IMAGE = new Image(Juggernaut.class.getResource("/animation/enemy2_animation/dead.png").toExternalForm());
 
     public Juggernaut(double x, double y) {
         super(x, y, SPEED);

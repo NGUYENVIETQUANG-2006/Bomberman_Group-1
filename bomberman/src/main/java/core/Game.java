@@ -26,16 +26,18 @@ import javafx.scene.Cursor;
 import javafx.scene.input.MouseButton;
 
 public class Game {
-    public static final int COLS = 30;
-    public static final int ROWS = 20;
+    public static final int COLS = 20;
+    public static final int ROWS = 15;
     public static final int HUD_HEIGHT = 48;
     public static final int WIDTH = COLS * GameMap.TILE_SIZE;
     public static final int HEIGHT = ROWS * GameMap.TILE_SIZE + HUD_HEIGHT;
     private static final int MAX_LEVEL = 3;
     private static final String LEVEL_PATH = "/maps/level%d.txt";
-    private static final int ENEMY_SCORE = 100;
+    private static final int GRUNT_SCORE = 100;
+    private static final int JUGGERNAUT_SCORE = 300;
     private static final double MAX_DT = 0.05;
-    private enum State { PLAYING, PAUSED, GAME_OVER, VICTORY }
+    private static final double COUNTDOWN_SECONDS = 3.0;
+    private enum State { COUNTDOWN, PLAYING, PAUSED, GAME_OVER, VICTORY }
     private final GraphicsContext gc;
     private final Canvas canvas;
     private final InputHandler input;
@@ -55,6 +57,7 @@ public class Game {
     private boolean scoreRecorded;
     private long elapsedNanos;
     private String playerName = "Người chơi";
+    private double countdownRemaining;
 
     public Game(Canvas canvas, InputHandler input, KeysBinding keys) {
         this.canvas = canvas;
@@ -100,7 +103,7 @@ public class Game {
 
     public void startSaved(GameStorage.Save save) {
         level = Math.max(1, Math.min(MAX_LEVEL, save.level()));
-        state = State.PLAYING;
+        beginCountdown();
         loadLevel();
         player.setPosition(save.x(), save.y());
         player.restoreState(save.health(), save.score(), save.speed(), save.blastRange(), save.bombCooldown());
@@ -113,7 +116,7 @@ public class Game {
     private void startNewGame() {
         level = 1;
         player = null;
-        state = State.PLAYING;
+        beginCountdown();
         scoreRecorded = false;
         elapsedNanos = 0;
         loadLevel();
@@ -142,10 +145,19 @@ public class Game {
             state = State.VICTORY;
         } else {
             loadLevel();
+            beginCountdown();
         }
     }
 
     private void update(double dt) {
+        if (state == State.COUNTDOWN) {
+            countdownRemaining -= dt;
+            if (countdownRemaining <= 0) {
+                state = State.PLAYING;
+            }
+            return;
+        }
+
         if (state == State.PAUSED) {
             updatePauseMenu();
             return;
@@ -204,7 +216,11 @@ public class Game {
         for (Enemy e : map.getEnemies()) {
             if (!e.isAlive()) {
                 if (e.markScoreAwarded()) {
-                    player.addScore(ENEMY_SCORE);
+                    if (e instanceof Grunt) {
+                        player.addScore(GRUNT_SCORE);
+                    } else if (e instanceof Juggernaut) {
+                        player.addScore(JUGGERNAUT_SCORE);
+                    }
                 }
             }
         }
@@ -266,6 +282,8 @@ public class Game {
         drawHud();
         if (state == State.PAUSED) {
             drawPauseMenu();
+        } else if (state == State.COUNTDOWN) {
+            drawCountdown();
         } else if (state != State.PLAYING) {
             drawOverlay();
         }
@@ -385,6 +403,23 @@ public class Game {
                 + "   -   ENTER: chơi lại   ESC: về menu", WIDTH / 2.0, HEIGHT / 2.0 + 30);
     }
 
+    private void drawCountdown() {
+        gc.setFill(Color.color(0, 0, 0, 0.55));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+        gc.setFill(Color.WHITE);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 32));
+        gc.fillText("BẮT ĐẦU SAU", WIDTH / 2.0, HEIGHT / 2.0 - 35);
+        gc.setFill(Color.GOLD);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 88));
+        gc.fillText(Integer.toString(Math.max(1, (int) Math.ceil(countdownRemaining))), WIDTH / 2.0, HEIGHT / 2.0 + 60);
+    }
+
+    private void beginCountdown() {
+        countdownRemaining = COUNTDOWN_SECONDS;
+        state = State.COUNTDOWN;
+    }
+
     private void drawPauseMenu() {
         gc.setFill(Color.color(0, 0, 0, 0.65));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -476,7 +511,7 @@ public class Game {
 
     private void activatePauseOption() {
         switch (pauseIndex) {
-            case 0 -> state = State.PLAYING;
+            case 0 -> beginCountdown();
             case 1 -> saveGame();
             case 2 -> startNewGame();
             default -> exitToMenu();
@@ -488,7 +523,7 @@ public class Game {
             GameStorage.save(new GameStorage.Save(level, player.getX(), player.getY(), player.getHealth(),
                     player.getScore(), player.getSpeed(), player.getBlastRange(), player.getBombCooldown(),
                     elapsedNanos / 1_000_000L, playerName));
-            state = State.PLAYING;
+            beginCountdown();
         } catch (IOException e) {
             System.err.println("Không lưu được ván chơi: " + e.getMessage());
         }

@@ -98,9 +98,7 @@ public abstract class Enemy extends GameCharacter {
 
     private void killPlayerIfTouching() {
         Player p = map.getPlayer();
-        if (p != null && p.isAlive()
-                && Math.abs(x - p.getX()) < TOUCH_DISTANCE
-                && Math.abs(y - p.getY()) < TOUCH_DISTANCE) {
+        if (p != null && p.isAlive() && Math.abs(x - p.getX()) < TOUCH_DISTANCE && Math.abs(y - p.getY()) < TOUCH_DISTANCE) {
             p.kill();
         }
     }

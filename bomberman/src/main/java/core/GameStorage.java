@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Properties;
 
 public final class GameStorage {
-    private static final Path DIRECTORY = Path.of("bomberman", "src", "main", "resources", "saves");
+    private static final Path DIRECTORY = Path.of("bomberman", "src", "resources", "saves");
     private static final Path SAVE_FILE = DIRECTORY.resolve("save.properties");
     private static final Path SCORE_FILE = DIRECTORY.resolve("scoreboard.csv");
 

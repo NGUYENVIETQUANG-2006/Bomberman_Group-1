@@ -8,12 +8,8 @@ import model.movable.Player;
 
 public class Grunt extends Enemy {
     private static final double SPEED = 60;
-    private static final Image MOVING_IMAGE = new Image(
-            Grunt.class.getResource("/animation/enemy1_animation/moving.gif")
-                    .toExternalForm());
-    private static final Image DEAD_IMAGE = new Image(
-            Grunt.class.getResource("/animation/enemy1_animation/dead.png")
-                    .toExternalForm());
+    private static final Image MOVING_IMAGE = new Image(Grunt.class.getResource("/animation/enemy1_animation/moving.gif").toExternalForm());
+    private static final Image DEAD_IMAGE = new Image(Grunt.class.getResource("/animation/enemy1_animation/dead.png").toExternalForm());
 
     public Grunt(double x, double y) {
         super(x, y, SPEED);
