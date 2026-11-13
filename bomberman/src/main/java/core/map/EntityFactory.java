@@ -9,7 +9,7 @@ import model.movable.npc.*;
  *
  * Bảng ký tự:
  *   '#' Wall          '*' Brick         'x' Portal
- *   '1' Grunt         '2' Juggernaut
+ *   '1' Grunt         '2' Juggernaut     '3' Ghost
  *   'h' Brick giấu Health   'c' Brick giấu Cooldown
  *   'f' Brick giấu Flame    's' Brick giấu Speed
  *   ' ' ô trống (cỏ)  -> trả về null
@@ -32,6 +32,7 @@ public class EntityFactory {
 
             case '1' -> new Grunt(x, y);
             case '2' -> new Juggernaut(x, y);
+            case '3' -> new Ghost(x, y);
 
             case ' ' -> null;
             default -> throw new IllegalArgumentException(
