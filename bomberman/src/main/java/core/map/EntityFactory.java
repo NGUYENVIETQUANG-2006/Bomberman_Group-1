@@ -22,13 +22,14 @@ public class EntityFactory {
 
         return switch (symbol) {
             case '#' -> new Wall(x, y);
-            case '*' -> new Brick(x, y);
+            case '*' -> new Ice(x, y);
             case 'x' -> new Portal(x, y);
+            case 'i' -> new Ice(x, y);
 
-            case 'h' -> new Brick(x, y, new HealthItem(x, y));
-            case 'c' -> new Brick(x, y, new CooldownItem(x, y));
-            case 'f' -> new Brick(x, y, new FlameItem(x, y));
-            case 's' -> new Brick(x, y, new SpeedItem(x, y));
+            case 'h' -> new Ice(x, y, new HealthItem(x, y));
+            case 'c' -> new Ice(x, y, new CooldownItem(x, y));
+            case 'f' -> new Ice(x, y, new FlameItem(x, y));
+            case 's' -> new Ice(x, y, new SpeedItem(x, y));
 
             case '1' -> new Grunt(x, y);
             case '2' -> new Juggernaut(x, y);

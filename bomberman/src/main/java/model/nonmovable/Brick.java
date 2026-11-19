@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 
 public class Brick extends Entity {
     private static final Image BRICK_IMAGE = new Image(Brick.class.getResource(
-            "/picture/Brick/PalmOS - Bomberman for Palm OS - Miscellaneous - Bomberman, Enemies, Bombs, Items, & Blocks_03.png")
+            "/picture/Ice/jpg_03.png")
             .toExternalForm());
 
     private boolean destroyed = false; 

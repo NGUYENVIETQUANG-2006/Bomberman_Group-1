@@ -3,6 +3,7 @@ package core;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import component.*;
 import core.input.*;
@@ -32,6 +33,8 @@ public class Game {
     public static final int WIDTH = COLS * GameMap.TILE_SIZE;
     public static final int HEIGHT = ROWS * GameMap.TILE_SIZE + HUD_HEIGHT;
     private static final int MAX_LEVEL = 3;
+    private static final int SNOWFLAKE_COUNT = 220;
+    private static final double SNOW_AREA_HEIGHT = ROWS * GameMap.TILE_SIZE;
     private static final String LEVEL_PATH = "/maps/level%d.txt";
     private static final int GRUNT_SCORE = 100;
     private static final int JUGGERNAUT_SCORE = 300;
@@ -43,6 +46,8 @@ public class Game {
     private final InputHandler input;
     private final LevelLoader loader = new LevelLoader(new EntityFactory());
     private final AnimationTimer timer;
+    private final Snowflake[] snowflakes = new Snowflake[SNOWFLAKE_COUNT];
+    private final Random weatherRandom = new Random();
     private GameMap map;
     private Player player;
     private int level = 1;
@@ -64,6 +69,7 @@ public class Game {
         this.gc = canvas.getGraphicsContext2D();
         this.input = input;
         this.keys = keys;
+        initializeSnow();
         this.timer = new AnimationTimer() {
             private long last = 0;
 
@@ -77,6 +83,7 @@ public class Game {
                 double dt = Math.min((now - last) / 1e9, MAX_DT);
                 last = now;
 
+                updateSnow(dt);
                 update(dt);
                 render();
                 input.endFrame();
@@ -279,6 +286,7 @@ public class Game {
             draw(player);
         }
 
+        drawSnow();
         drawHud();
         if (state == State.PAUSED) {
             drawPauseMenu();
@@ -288,6 +296,54 @@ public class Game {
             drawOverlay();
         }
         gc.restore();
+    }
+
+    private void initializeSnow() {
+        for (int i = 0; i < snowflakes.length; i++) {
+            snowflakes[i] = new Snowflake(
+                    weatherRandom.nextDouble() * WIDTH,
+                    weatherRandom.nextDouble() * SNOW_AREA_HEIGHT,
+                    24 + weatherRandom.nextDouble() * 38,
+                    5 + weatherRandom.nextDouble() * 15,
+                    2 + weatherRandom.nextDouble() * 2);
+        }
+    }
+
+    private void updateSnow(double dt) {
+        for (Snowflake snowflake : snowflakes) {
+            snowflake.x += snowflake.drift * dt;
+            snowflake.y += snowflake.speed * dt;
+            if (snowflake.y > SNOW_AREA_HEIGHT) {
+                snowflake.y = -snowflake.size;
+                snowflake.x = weatherRandom.nextDouble() * WIDTH;
+            }
+            if (snowflake.x > WIDTH) {
+                snowflake.x = 0;
+            }
+        }
+    }
+
+    private void drawSnow() {
+        gc.setFill(Color.color(0.88, 0.96, 1.0, 0.72));
+        for (Snowflake snowflake : snowflakes) {
+            gc.fillOval(snowflake.x, snowflake.y, snowflake.size, snowflake.size);
+        }
+    }
+
+    private static final class Snowflake {
+        private double x;
+        private double y;
+        private final double speed;
+        private final double drift;
+        private final double size;
+
+        private Snowflake(double x, double y, double speed, double drift, double size) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.drift = drift;
+            this.size = size;
+        }
     }
 
     private void draw(Entity e) {
