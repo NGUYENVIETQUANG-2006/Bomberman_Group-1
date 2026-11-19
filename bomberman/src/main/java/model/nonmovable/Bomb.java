@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.image.Image;
+import javafx.scene.canvas.GraphicsContext;
 
 import component.Entity;
 import core.map.GameMap;
 import core.input.Direction;
 
 public class Bomb extends Entity {
+    private static final double MODEL_SCALE = 0.75;
     private static final double ANIMATION_FRAME_TIME = 0.33;
     private static final Image[] ANIMATION_FRAMES = {
             loadFrame("frame1.png"),
@@ -32,6 +34,16 @@ public class Bomb extends Entity {
         super(x, y);
         this.blastRange = blastRange;
         setImage(ANIMATION_FRAMES[0]);
+    }
+
+    @Override
+    public void render(GraphicsContext gc) {
+        if (img == null) {
+            return;
+        }
+        double size = GameMap.TILE_SIZE * MODEL_SCALE;
+        double offset = (GameMap.TILE_SIZE - size) / 2;
+        gc.drawImage(img, x + offset, y + offset, size, size);
     }
 
     @Override

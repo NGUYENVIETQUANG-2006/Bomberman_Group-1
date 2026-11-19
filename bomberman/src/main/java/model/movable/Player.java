@@ -9,6 +9,7 @@ import core.map.*;
 import model.nonmovable.*;
 
 public class Player extends GameCharacter {
+    private static final double MODEL_SCALE = 1.1;
     private static final double BASE_SPEED = 120;
     private static final double MAX_SPEED = 200;
     private static final double SPEED_STEP = 20;
@@ -339,8 +340,8 @@ public class Player extends GameCharacter {
     private void drawPlayerImage(GraphicsContext gc) {
         double tileSize = GameMap.TILE_SIZE;
         double scale = Math.min(tileSize / img.getWidth(), tileSize / img.getHeight());
-        double width = img.getWidth() * scale;
-        double height = img.getHeight() * scale;
+        double width = img.getWidth() * scale * MODEL_SCALE;
+        double height = img.getHeight() * scale * MODEL_SCALE;
         gc.drawImage(img, x + (tileSize - width) / 2, y + (tileSize - height) / 2, width, height);
     }
 }
