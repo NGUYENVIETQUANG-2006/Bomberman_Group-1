@@ -12,7 +12,7 @@ import model.movable.Player;
 public abstract class Enemy extends GameCharacter {
     private static final double TOUCH_DISTANCE = GameMap.TILE_SIZE * 0.7;
     private static final double WANDER_KEEP_STRAIGHT = 0.7;
-    private static final double DEAD_DISPLAY_TIME = 1.0;
+    private static final double DEAD_DISPLAY_TIME = 0.3;
 
     protected final Random random = new Random();
 
