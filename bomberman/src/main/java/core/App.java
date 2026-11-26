@@ -36,7 +36,13 @@ public class App extends Application {
         stage.show();
     }
 
+    @Override
+    public void stop() {
+        AudioManager.stopAll();
+    }
+
     private void showMainMenu() {
+        AudioManager.playMenuMusic();
         show(new MainMenu(this::startNewGame, this::continueGame, this::showScoreboard, this::showSettings, Platform::exit));
     }
 
@@ -69,6 +75,7 @@ public class App extends Application {
     }
 
     private void startGame(GameStorage.Save savedGame, String playerName) {
+        AudioManager.stopMusic();
         Canvas canvas = new Canvas(Game.WIDTH, Game.HEIGHT);
         Pane gameRoot = new Pane(canvas);
         canvas.widthProperty().bind(gameRoot.widthProperty());

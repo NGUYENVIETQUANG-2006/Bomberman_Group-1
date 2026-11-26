@@ -135,6 +135,8 @@ public class Game {
         } catch (IOException e) {
             throw new UncheckedIOException("Không nạp được màn " + level, e);
         }
+        AudioManager.playLevelMusic(level);
+        AudioManager.playEffect(AudioManager.Effect.STAGE_START);
 
         double px = map.getPlayerSpawnCol() * GameMap.TILE_SIZE;
         double py = map.getPlayerSpawnRow() * GameMap.TILE_SIZE;
@@ -150,7 +152,10 @@ public class Game {
         level++;
         if (level > MAX_LEVEL) {
             state = State.VICTORY;
+            AudioManager.stopMusic();
+            AudioManager.playEffect(AudioManager.Effect.FINAL_WIN);
         } else {
+            AudioManager.playEffect(AudioManager.Effect.LEVEL_COMPLETE);
             loadLevel();
             beginCountdown();
         }
@@ -188,6 +193,7 @@ public class Game {
         }
 
         elapsedNanos += (long) (dt * 1_000_000_000L);
+        int healthBeforeUpdate = player.getHealth();
         player.update(dt);
         for (Enemy e : new ArrayList<>(map.getEnemies())) {
             e.update(dt);
@@ -195,6 +201,9 @@ public class Game {
 
         updateBombs(dt);
         updateFlames(dt);
+        if (player.getHealth() < healthBeforeUpdate && player.getHealth() > 0) {
+            AudioManager.playEffect(AudioManager.Effect.LIFE_LOST);
+        }
         removeDeadEnemies();
         pickUpItem();
         checkEndConditions();
@@ -249,6 +258,8 @@ public class Game {
     private void checkEndConditions() {
         if (!player.isAlive()) {
             state = State.GAME_OVER;
+            AudioManager.stopMusic();
+            AudioManager.playEffect(AudioManager.Effect.GAME_OVER);
             recordScore();
             return;
         }
@@ -508,6 +519,7 @@ public class Game {
 
     public void stop() {
         timer.stop();
+        AudioManager.stopMusic();
     }
 
     private void updatePauseMenu() {

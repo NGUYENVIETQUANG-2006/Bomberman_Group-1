@@ -7,6 +7,7 @@ import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
 
 import component.Entity;
+import core.AudioManager;
 import core.map.GameMap;
 import core.input.Direction;
 
@@ -108,6 +109,7 @@ public class Bomb extends Entity {
                 chainExplode(nr, nc, map, flames);
             }
         }
+        AudioManager.playEffect(AudioManager.Effect.BOMB_EXPLOSION);
         return flames;
     }
 
